@@ -1,0 +1,48 @@
+#!/bin/bash
+
+set -e -o pipefail
+
+basedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
+
+# shellcheck disable=SC1090
+. "$basedir/lib/shared.bash"
+
+TMPDIR=${TMPDIR:-/tmp}
+AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
+
+# Use settings from S3 secrets plugin
+s3_bucket="${BUILDKITE_PLUGIN_S3_SECRETS_BUCKET:-}"
+s3_bucket_prefix="${BUILDKITE_PLUGIN_S3_SECRETS_BUCKET_PREFIX:-$BUILDKITE_PIPELINE_SLUG}"
+
+if [[ -n "$s3_bucket" ]] ; then
+  echo "~~~ Downloading secret files from :s3: $s3_bucket" >&2;
+
+  if ! s3_bucket_exists "$s3_bucket" ; then
+    echo "+++ :warning: Bucket $s3_bucket doesn't exist" >&2;
+    exit 1
+  fi
+
+  while IFS='=' read -r name _ ; do
+    if [[ $name =~ ^BUILDKITE_PLUGIN_S3_SECRET_FILES_FILES_([0-9]+)_SRC ]] ; then
+      index="${BASH_REMATCH[1]}"
+      src_var="BUILDKITE_PLUGIN_S3_SECRET_FILES_FILES_${index}_SRC"
+      dest_var="BUILDKITE_PLUGIN_S3_SECRET_FILES_FILES_${index}_DEST"
+      src=${s3_bucket_prefix}/${!src_var}
+      dest=${!dest_var}
+      if [ -z "$dest" ]; then
+        echo "${dest_var} is not set" >&2;
+        exit 1
+      fi
+      echo "Checking ${src}" >&2
+      if s3_exists "$s3_bucket" "$src" ; then
+        echo "Found ${src}, downloading" >&2;
+        if ! $(s3_download "${s3_bucket}" "$src" "$dest") ; then
+          echo "+++ :warning: Failed to download $src to $dest" >&2;
+          exit 1
+        fi
+        echo "Downloaded ${src} to ${dest}"
+      fi
+    fi
+  done < <(env | sort)
+
+fi
