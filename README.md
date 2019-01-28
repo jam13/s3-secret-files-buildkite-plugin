@@ -18,6 +18,9 @@ steps:
         dest: src/secret
       - src: another-secret
         dest: lib/another
+      - src: secret-dir
+        dest: destination-dir
+        args: --recursive
 ```
 
 ## Uploading Files
