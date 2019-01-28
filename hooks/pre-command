@@ -27,16 +27,18 @@ if [[ -n "$s3_bucket" ]] ; then
       index="${BASH_REMATCH[1]}"
       src_var="BUILDKITE_PLUGIN_S3_SECRET_FILES_FILES_${index}_SRC"
       dest_var="BUILDKITE_PLUGIN_S3_SECRET_FILES_FILES_${index}_DEST"
+      args_var="BUILDKITE_PLUGIN_S3_SECRET_FILES_FILES_${index}_ARGS"
       src=${s3_bucket_prefix}/${!src_var}
       dest=${!dest_var}
       if [ -z "$dest" ]; then
         echo "${dest_var} is not set" >&2;
         exit 1
       fi
+      args=${!args_var}
       echo "Checking ${src}" >&2
       if s3_exists "$s3_bucket" "$src" ; then
         echo "Found ${src}, downloading" >&2;
-        if ! $(s3_download "${s3_bucket}" "$src" "$dest") ; then
+        if ! $(s3_download "${s3_bucket}" "$src" "$dest" "$args") ; then
           echo "+++ :warning: Failed to download $src to $dest" >&2;
           exit 1
         fi
