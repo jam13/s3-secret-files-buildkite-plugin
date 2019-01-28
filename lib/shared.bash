@@ -21,4 +21,6 @@ s3_download() {
   if ! aws s3 cp "${aws_s3_args[@]}" $extra_args "s3://$1/$2" "$3" ; then
     exit 1
   fi
+
+  chmod -R og-rwx "$3"
 }
