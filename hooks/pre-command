@@ -35,15 +35,12 @@ if [[ -n "$s3_bucket" ]] ; then
         exit 1
       fi
       args=${!args_var}
-      echo "Checking ${src}" >&2
-      if s3_exists "$s3_bucket" "$src" ; then
-        echo "Found ${src}, downloading" >&2;
-        if ! $(s3_download "${s3_bucket}" "$src" "$dest" "$args") ; then
-          echo "+++ :warning: Failed to download $src to $dest" >&2;
-          exit 1
-        fi
-        echo "Downloaded ${src} to ${dest}"
+      echo "Attempting to download ${src}" >&2;
+      if ! $(s3_download "${s3_bucket}" "$src" "$dest" "$args") ; then
+        echo "+++ :warning: Failed to download $src to $dest" >&2;
+        exit 1
       fi
+      echo "Downloaded ${src} to ${dest}"
     fi
   done < <(env | sort)
 

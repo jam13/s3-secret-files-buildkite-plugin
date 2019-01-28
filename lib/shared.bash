@@ -1,15 +1,5 @@
 #!/bin/bash
 
-s3_exists() {
-  local bucket="$1"
-  local key="$2"
-  local aws_s3_args=("--region=$AWS_DEFAULT_REGION")
-
-  if ! aws s3api head-object "${aws_s3_args[@]}" --bucket "$bucket" --key "$key" &>/dev/null ; then
-    return 1
-  fi
-}
-
 s3_bucket_exists() {
   local bucket="$1"
   if ! aws s3api head-bucket --bucket "$bucket" &>/dev/null ; then
