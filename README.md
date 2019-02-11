@@ -12,15 +12,15 @@ steps:
   command:
   - build.sh
   plugins:
-    jam13/s3-secret-files#1.0.0:
-      files:
-      - src: secret-file
-        dest: src/secret
-      - src: another-secret
-        dest: lib/another
-      - src: secret-dir
-        dest: destination-dir
-        args: --recursive
+    - jam13/s3-secret-files#1.0.0:
+        files:
+        - src: secret-file
+          dest: src/secret
+        - src: another-secret
+          dest: lib/another
+        - src: secret-dir
+          dest: destination-dir
+          args: --recursive
 ```
 
 ## Uploading Files
